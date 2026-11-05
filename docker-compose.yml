@@ -1,0 +1,27 @@
+services:
+  backend-api:
+    build:
+      context: ./backend-api
+      dockerfile: Dockerfile
+    container_name: backend-api-container
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./backend-api/.env
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /var/secrets/google/application_default_credentials.json
+    volumes:
+      - type: bind
+        source: ${APPDATA}/gcloud/application_default_credentials.json
+        target: /var/secrets/google/application_default_credentials.json
+        read_only: true
+    restart: unless-stopped
+
+  backend-realtime:
+    build:
+      context: ./backend-realtime
+      dockerfile: Dockerfile
+    container_name: backend-realtime-container
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
