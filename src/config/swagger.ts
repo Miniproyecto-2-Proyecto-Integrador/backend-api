@@ -1,3 +1,4 @@
+
 import swaggerJsdoc from "swagger-jsdoc";
 
 const swaggerOptions: swaggerJsdoc.Options = {
@@ -11,8 +12,10 @@ const swaggerOptions: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: "http://localhost:3000",
-        description: "Servidor local",
+        url: process.env.API_URL || "http://localhost:3000",
+        description: process.env.API_URL
+          ? "Servidor desplegado"
+          : "Servidor local",
       },
     ],
   },
