@@ -1,32 +1,43 @@
-# Backend API – Mini Proyecto 2
+Backend API – Mini Proyecto 2
 
 API REST del sistema de salas de estudio colaborativas desarrollado para el Mini Proyecto 2 de Proyecto Integrador.
 
-Este servicio funciona como intermediario entre el frontend y Firebase Firestore. Recibe las solicitudes del cliente, consulta la información almacenada y devuelve respuestas en formato JSON.
+Este servicio funciona como intermediario entre el frontend y Firebase Cloud Firestore. Recibe las solicitudes del cliente, consulta la información almacenada y devuelve respuestas en formato JSON.
 
-## Tecnologías
+Tecnologías
 
-- Node.js
-- TypeScript
-- Express
-- Firebase Admin SDK
-- Cloud Firestore
-- Swagger / OpenAPI 3.0
-- Docker
+Node.js 24
 
-## Responsabilidades
+TypeScript
 
-- Exponer los endpoints REST del sistema.
-- Consultar y gestionar información almacenada en Firestore.
-- Centralizar el acceso del frontend a la base de datos.
-- Validar y manejar errores de las solicitudes.
-- Proporcionar documentación de la API mediante Swagger.
+Express
 
-**Importante:** el frontend no debe conectarse directamente a Firestore. Las operaciones de acceso a datos deben realizarse a través de este backend.
+Firebase Admin SDK
 
-## Estructura del proyecto
+Cloud Firestore
 
-```text
+Swagger / OpenAPI 3.0
+
+Docker y Docker Compose
+
+Render
+
+Responsabilidades
+
+Exponer los endpoints REST del sistema.
+
+Consultar y gestionar información almacenada en Firestore.
+
+Centralizar el acceso del frontend a la base de datos.
+
+Manejar errores de las solicitudes.
+
+Proporcionar documentación de la API mediante Swagger.
+
+Importante: el frontend no debe conectarse directamente a Firestore. Las operaciones de acceso a datos se realizan a través de este backend.
+
+Estructura del proyecto
+
 backend-api/
 ├── src/
 │   ├── config/
@@ -40,150 +51,218 @@ backend-api/
 ├── .env.example
 ├── .gitignore
 ├── Dockerfile
+├── docker-compose.yml
 ├── package.json
 ├── package-lock.json
 └── tsconfig.json
-```
 
 La aplicación está organizada por responsabilidades:
 
-- **config:** configuración de Firebase y Swagger.
-- **controllers:** recepción y respuesta de las solicitudes HTTP.
-- **routes:** definición de los endpoints.
-- **services:** lógica de acceso a Firestore.
-- **index.ts:** configuración e inicio del servidor.
+config: configuración de Firebase y Swagger.
 
-## Requisitos previos
+controllers: recepción y respuesta de las solicitudes HTTP.
 
-- Node.js 24 o compatible.
-- npm.
-- Docker Desktop, para ejecutar el servicio en contenedor.
-- Un proyecto de Firebase con Cloud Firestore habilitado.
-- Credenciales de Firebase Admin SDK con permisos para acceder a Firestore.
+routes: definición de los endpoints.
 
-## Instalación y ejecución local
+services: lógica de acceso a Firestore.
 
-1. Clonar el repositorio:
+index.ts: configuración e inicio del servidor.
 
-```bash
+Requisitos previos
+
+Node.js 24 o compatible.
+
+npm.
+
+Docker Desktop.
+
+Un proyecto de Firebase con Cloud Firestore habilitado.
+
+Una identidad de servicio autorizada para acceder a Firestore.
+
+Instalación y ejecución local
+
+Clonar el repositorio:
+
 git clone https://github.com/Miniproyecto-2-Proyecto-Integrador/backend-api.git
 cd backend-api
-```
 
-2. Instalar las dependencias:
+Instalar las dependencias:
 
-```bash
 npm ci
-```
 
-3. Crear el archivo `.env` tomando como referencia `.env.example`:
+Crear el archivo .env tomando como referencia .env.example:
 
-```env
+FIREBASE_PROJECT_ID=mini-proyecto-2
 PORT=3000
-FIREBASE_PROJECT_ID=tu-proyecto-firebase
-```
+GOOGLE_APPLICATION_CREDENTIALS=
 
-4. Configurar las credenciales de aplicación de Google (ADC). En un entorno local se puede utilizar:
+Configurar la autenticación de Firebase Admin SDK.
 
-```bash
+Para desarrollo local se puede utilizar Application Default Credentials (ADC):
+
 gcloud auth application-default login
-```
 
-La identidad autenticada debe tener permisos suficientes para consultar Firestore.
+También se puede utilizar una cuenta de servicio autorizada, configurando GOOGLE_APPLICATION_CREDENTIALS con la ruta local del archivo de credenciales.
 
-5. Iniciar el servidor en desarrollo:
+Las credenciales deben mantenerse fuera del repositorio.
 
-```bash
+Iniciar el servidor en desarrollo:
+
 npm run dev
-```
 
 El servidor estará disponible en:
 
-`http://localhost:3000`
+http://localhost:3000
 
-## Variables de entorno
+Variables de entorno
 
-| Variable | Descripción |
-|---|---|
-| `PORT` | Puerto en el que se ejecuta el servidor. |
-| `FIREBASE_PROJECT_ID` | Identificador del proyecto de Firebase. |
+Variable
 
-La autenticación del SDK de Firebase Admin utiliza Application Default Credentials (ADC). Las credenciales no deben almacenarse en el repositorio ni compartirse mediante archivos públicos.
+Descripción
 
-## Endpoints disponibles
+PORT
 
-| Método | Ruta | Descripción |
-|---|---|---|
-| GET | `/` | Verifica que el backend esté funcionando. |
-| GET | `/api/pruebas` | Consulta documentos de la colección `pruebas` en Firestore. |
-| GET | `/api-docs` | Accede a la documentación Swagger. |
+Puerto en el que se ejecuta el servidor.
 
-### Ejemplo de respuesta
+FIREBASE_PROJECT_ID
 
-Al consultar `GET /api/pruebas`, el servicio devuelve una respuesta JSON con el resultado de la consulta a Firestore.
+Identificador del proyecto de Firebase.
 
-```json
+GOOGLE_APPLICATION_CREDENTIALS
+
+Ruta del archivo de credenciales utilizado por Firebase Admin SDK.
+
+La autenticación utiliza Application Default Credentials. En entornos Docker y Render se configura mediante una credencial externa, sin incorporarla a la imagen ni al repositorio.
+
+Firebase y Firestore
+
+El backend utiliza Firebase Admin SDK para acceder a Cloud Firestore.
+
+La configuración actual utiliza el proyecto mini-proyecto-2 y una cuenta de servicio exclusiva para Backend API.
+
+La cuenta de servicio dispone del rol Cloud Datastore User, necesario para las operaciones de acceso a Firestore.
+
+La base de datos utiliza la configuración de seguridad en modo de producción. El acceso administrativo se realiza mediante Firebase Admin SDK.
+
+Endpoints disponibles
+
+Método
+
+Ruta
+
+Descripción
+
+GET
+
+/
+
+Verifica que el backend esté funcionando.
+
+GET
+
+/api/pruebas
+
+Consulta documentos de la colección pruebas en Firestore.
+
+GET
+
+/api-docs
+
+Accede a la documentación Swagger.
+
+Ejemplo de respuesta
+
+Al consultar GET /api/pruebas, el servicio devuelve una respuesta JSON con el resultado de la consulta:
+
 {
   "success": true,
   "data": [
     {
-      "id": "identificador-del-documento",
-      "mensaje": "Firestore conectado correctamente"
+      "id": "prueba-01",
+      "nombre": "Mini Proyecto 2",
+      "mensaje": "Conexión exitosa con Firestore",
+      "estado": "activo"
     }
   ]
 }
-```
 
 El contenido depende de los documentos almacenados en la colección.
 
-## Construcción y ejecución con Docker
+Construcción y ejecución con Docker
 
-Construir la imagen:
+El proyecto utiliza Docker multi-stage para separar la etapa de compilación de la etapa de ejecución.
 
-```bash
-docker build -t backend-api .
-```
+Para construir y levantar el servicio:
 
-En PowerShell, ejecutar el contenedor utilizando las credenciales ADC locales:
+docker compose up --build -d
 
-```powershell
-docker run -d --name backend-api -p 3000:3000 --env-file .env -v "${env:APPDATA}/gcloud/application_default_credentials.json:/var/secrets/google/application_default_credentials.json:ro" -e GOOGLE_APPLICATION_CREDENTIALS=/var/secrets/google/application_default_credentials.json backend-api
-```
+Para consultar el estado del contenedor:
 
-Este comando monta las credenciales locales en modo de solo lectura. Es una configuración de desarrollo; no se deben incluir esas credenciales en la imagen ni en el repositorio.
+docker ps
 
-## Pruebas locales
+Para consultar los registros:
+
+docker compose logs -f
+
+Para detener el servicio:
+
+docker compose down
+
+Docker Compose utiliza el archivo .env y monta las credenciales de Google como un archivo externo de solo lectura. Las credenciales no se copian a la imagen Docker.
+
+Despliegue en Render
+
+El backend API se despliega en Render mediante Docker.
+
+La configuración del servicio utiliza las siguientes variables de entorno:
+
+FIREBASE_PROJECT_ID
+
+GOOGLE_APPLICATION_CREDENTIALS
+
+Las credenciales de Firebase se proporcionan mediante un Secret File de Render. La variable GOOGLE_APPLICATION_CREDENTIALS apunta a la ruta del archivo montado por Render.
+
+El archivo de credenciales no se almacena en GitHub ni se incorpora a la imagen Docker.
+
+Pruebas locales
 
 Verificar el estado del servidor:
 
-`http://localhost:3000/`
+http://localhost:3000/
 
 Consultar Firestore:
 
-`http://localhost:3000/api/pruebas`
+http://localhost:3000/api/pruebas
 
 Consultar la documentación:
 
-`http://localhost:3000/api-docs`
+http://localhost:3000/api-docs
 
-## Compilación
+Compilación
 
 Para comprobar que el código TypeScript compila correctamente:
 
-```bash
 npm run build
-```
 
-## Consideraciones de seguridad
+Consideraciones de seguridad
 
-- No subir archivos `.env` al repositorio.
-- No publicar claves privadas ni archivos de credenciales.
-- Mantener `.env.example` sin valores sensibles.
-- Utilizar credenciales con los permisos mínimos necesarios.
-- El acceso del frontend a los datos debe realizarse a través de la API.
+No subir archivos .env al repositorio.
 
-## Estado del servicio
+No publicar claves privadas ni archivos de credenciales.
 
-La arquitectura base del backend API se encuentra implementada. Incluye conexión con Firestore, endpoint de consulta, manejo de errores, documentación Swagger y configuración para ejecución mediante Docker.
+Mantener .env.example sin valores sensibles.
+
+Utilizar credenciales con los permisos mínimos necesarios.
+
+Excluir credenciales y variables locales mediante .gitignore y .dockerignore.
+
+No incorporar credenciales dentro de las imágenes Docker.
+
+Centralizar el acceso del frontend a Firestore mediante el backend API.
+
+Estado del servicio
+
+La arquitectura base del backend API se encuentra implementada. Incluye conexión con Firestore, endpoint de consulta, manejo de errores, documentación Swagger y configuración para ejecución mediante Docker y Docker Compose.
 
 La implementación de nuevos endpoints y funcionalidades se ampliará durante las siguientes sprints.
