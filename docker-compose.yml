@@ -1,0 +1,18 @@
+services:
+  backend-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backend-api-container
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - type: bind
+        source: ${GOOGLE_APPLICATION_CREDENTIALS}
+        target: /var/secrets/google/service-account.json
+        read_only: true
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /var/secrets/google/service-account.json
+    restart: unless-stopped

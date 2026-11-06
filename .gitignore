@@ -1,0 +1,17 @@
+# Dependencias
+node_modules/
+**/node_modules/
+
+# Variables de entorno y credenciales
+.env
+.env.*
+!.env.example
+**/serviceAccountKey.json
+
+# Archivos compilados
+dist/
+**/dist/
+
+# Archivos del sistema y editor
+.DS_Store
+.vscode/
