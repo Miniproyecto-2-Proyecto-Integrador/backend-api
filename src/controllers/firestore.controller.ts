@@ -18,10 +18,6 @@ export const consultarPruebas = async (
     res.status(500).json({
       success: false,
       message: "Error interno al consultar los datos.",
-      details:
-        error instanceof Error
-          ? error.message
-          : "Error desconocido",
     });
   }
 };
