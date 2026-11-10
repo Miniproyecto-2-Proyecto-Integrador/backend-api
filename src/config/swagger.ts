@@ -1,4 +1,3 @@
-
 import swaggerJsdoc from "swagger-jsdoc";
 
 const swaggerOptions: swaggerJsdoc.Options = {
@@ -18,6 +17,16 @@ const swaggerOptions: swaggerJsdoc.Options = {
           : "Servidor local",
       },
     ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+          description: "Token de Firebase del usuario con sesión iniciada.",
+        },
+      },
+    },
   },
   apis:
     process.env.NODE_ENV === "production"
