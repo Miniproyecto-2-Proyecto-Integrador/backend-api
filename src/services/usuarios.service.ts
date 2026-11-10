@@ -31,3 +31,14 @@ export async function crearPerfil(uid: string, datos: DatosPerfil) {
     t.set(usuarioRef, { ...datos, creadoEn: FieldValue.serverTimestamp() });
   });
 }
+
+export async function obtenerPerfil(uid: string) {
+  const doc = await db.collection("users").doc(uid).get();
+
+  if (!doc.exists) {
+    return null;
+  }
+
+  const datos = doc.data();
+  return { ...datos, creadoEn: datos?.creadoEn?.toDate() };
+}

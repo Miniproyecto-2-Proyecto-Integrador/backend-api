@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { crearPerfil } from "../services/usuarios.service";
+import { crearPerfil, obtenerPerfil } from "../services/usuarios.service";
 
 function texto(valor: unknown) {
   return typeof valor === "string" ? valor.trim() : "";
@@ -69,6 +69,28 @@ export async function crearUsuario(req: Request, res: Response) {
     res.status(500).json({
       success: false,
       message: "No pudimos crear tu perfil. Intenta de nuevo.",
+    });
+  }
+}
+
+export async function obtenerMiPerfil(_req: Request, res: Response) {
+  try {
+    const perfil = await obtenerPerfil(res.locals.uid);
+
+    if (!perfil) {
+      res.status(404).json({
+        success: false,
+        message: "Este usuario aún no tiene perfil.",
+      });
+      return;
+    }
+
+    res.status(200).json({ success: true, data: perfil });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "No pudimos cargar tu perfil. Intenta de nuevo.",
     });
   }
 }
