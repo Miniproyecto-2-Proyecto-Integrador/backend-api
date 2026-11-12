@@ -1,8 +1,9 @@
-import express from "express";
 import cors from "cors";
-import firestoreRoutes from "./routes/firestore.routes";
+import express from "express";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./config/swagger";
+import firestoreRoutes from "./routes/firestore.routes";
+import usuariosRoutes from "./routes/usuarios.routes";
 
 const app = express();
 
@@ -31,6 +32,8 @@ app.get("/", (_req, res) => {
 
 // Rutas de Firestore
 app.use("/api", firestoreRoutes);
+
+app.use("/api", usuariosRoutes);
 
 app.listen(PORT, () => {
   console.log(`Servidor ejecutándose en el puerto ${PORT}`);
