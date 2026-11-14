@@ -1,10 +1,8 @@
 import { Router } from "express";
 import { crearUsuario, obtenerMiPerfil } from "../controllers/usuarios.controller";
 import { verificarToken } from "../middlewares/verificarToken";
-import eliminarCuentaRoutes from "./eliminarCuenta.routes";
 
 const router = Router();
-router.use(eliminarCuentaRoutes);
 
 /**
  * @swagger
