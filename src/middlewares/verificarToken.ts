@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { auth } from "../config/firebase";
+import { auth, db } from "../config/firebase";
 
 export async function verificarToken(
   req: Request,
@@ -19,10 +19,15 @@ export async function verificarToken(
   const token = encabezado.split(" ")[1];
 
   try {
-    // Allow a still-valid token to retry deletion if Firestore cleanup failed
-    // after Firebase Authentication removed the account.
-    const esEliminacionPropia = req.method === "DELETE" && req.path === "/usuarios/yo";
-    const datos = await auth.verifyIdToken(token, !esEliminacionPropia);
+    const datos = await auth.verifyIdToken(token, true).catch(async (error) => {
+      // Retry only a deletion already in progress after Auth removed the account.
+      if (req.method !== "DELETE" || req.path !== "/usuarios/yo" ||
+          error.code !== "auth/user-not-found") throw error;
+      const sesion = await auth.verifyIdToken(token);
+      const perfil = await db.collection("users").doc(sesion.uid).get();
+      if (!perfil.get("eliminando")) throw error;
+      return sesion;
+    });
     res.locals.uid = datos.uid;
     res.locals.correo = datos.email;
     next();

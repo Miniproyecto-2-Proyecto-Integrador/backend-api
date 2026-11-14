@@ -13,7 +13,7 @@ export async function eliminarCuenta(uid: string) {
     await db.runTransaction(async (t) => {
       if ((await t.get(sala.ref)).exists) t.update(sala.ref, { eliminando: true });
     });
-    // Keep the room document until its messages are gone so a retry can find it.
+    // El documento de la sala permite localizar el chat si hay que reintentar.
     await db.recursiveDelete(sala.ref.collection("messages"));
     await sala.ref.delete();
   }
@@ -21,11 +21,15 @@ export async function eliminarCuenta(uid: string) {
   while (true) {
     const mensajes = await db.collectionGroup("messages").where("autorUid", "==", uid).limit(400).get();
     if (mensajes.empty) break;
-    const lote = db.batch();
-    for (const mensaje of mensajes.docs) {
-      lote.update(mensaje.ref, { autorUid: FieldValue.delete(), autor: "Cuenta eliminada" });
-    }
-    await lote.commit();
+    const escritor = db.bulkWriter();
+    const cambios = mensajes.docs.map((mensaje) => escritor.update(mensaje.ref, {
+      autorUid: FieldValue.delete(),
+      autor: "Cuenta eliminada",
+    }).catch((error) => {
+      // La sala pudo eliminarse al mismo tiempo que esta cuenta.
+      if (error.code !== 5) throw error;
+    }));
+    await Promise.all([escritor.close(), ...cambios]);
   }
 
   try {
@@ -42,5 +46,4 @@ export async function eliminarCuenta(uid: string) {
     if (reserva.get("uid") === uid) t.delete(usernameRef);
     t.delete(perfilRef);
   });
-
 }
