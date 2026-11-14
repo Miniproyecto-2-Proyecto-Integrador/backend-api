@@ -19,7 +19,10 @@ export async function verificarToken(
   const token = encabezado.split(" ")[1];
 
   try {
-    const datos = await auth.verifyIdToken(token);
+    // Allow a still-valid token to retry deletion if Firestore cleanup failed
+    // after Firebase Authentication removed the account.
+    const esEliminacionPropia = req.method === "DELETE" && req.path === "/usuarios/yo";
+    const datos = await auth.verifyIdToken(token, !esEliminacionPropia);
     res.locals.uid = datos.uid;
     res.locals.correo = datos.email;
     next();
