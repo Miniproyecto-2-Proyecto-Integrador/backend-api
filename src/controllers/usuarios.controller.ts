@@ -135,6 +135,10 @@ export async function editarMiPerfil(req: Request, res: Response) {
       res.status(404).json({ success: false, message: "Este usuario aún no tiene perfil." });
       return;
     }
+    if (motivo === "PERFIL_MODIFICADO") {
+      res.status(409).json({ success: false, message: "Tu perfil cambió. Vuelve a cargarlo e intenta de nuevo." });
+      return;
+    }
     const campo = motivo === "USERNAME_OCUPADO" ? "username"
       : motivo === "CORREO_OCUPADO" || codigo === "auth/email-already-exists" ? "correo" : null;
     if (campo) {

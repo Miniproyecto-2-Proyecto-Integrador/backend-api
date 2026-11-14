@@ -35,7 +35,7 @@ export async function crearPerfil(uid: string, datos: DatosPerfil) {
 export async function obtenerPerfil(uid: string) {
   const doc = await db.collection("users").doc(uid).get();
 
-  if (!doc.exists) {
+  if (!doc.exists || doc.get("eliminando")) {
     return null;
   }
 
@@ -48,15 +48,17 @@ export async function actualizarPerfil(uid: string, cambios: Partial<DatosPerfil
   const usernames = db.collection("usernames");
   const correo = cambios.correo;
 
-  if (correo) {
-    const coincidencias = await db.collection("users").where("correo", "==", correo).get();
-    if (coincidencias.docs.some((doc) => doc.id !== uid)) {
-      throw new Error("CORREO_OCUPADO");
-    }
-  }
-
   const previo = await usuarioRef.get();
   if (!previo.exists || previo.get("eliminando")) throw new Error("PERFIL_NO_EXISTE");
+  if (correo) {
+    const coincidencias = await db.collection("users").where("correo", "==", correo).get();
+    if (coincidencias.docs.some((doc) => doc.id !== uid)) throw new Error("CORREO_OCUPADO");
+  }
+  const username = cambios.username?.toLowerCase();
+  if (username && username !== (previo.get("username") as string).toLowerCase()) {
+    const reserva = await usernames.doc(username).get();
+    if (reserva.exists && reserva.get("uid") !== uid) throw new Error("USERNAME_OCUPADO");
+  }
   const cuenta = correo ? await auth.getUser(uid) : undefined;
   const cambiarCorreo = correo !== undefined && cuenta?.email !== correo;
   let correoActualizado = false;
@@ -69,8 +71,9 @@ export async function actualizarPerfil(uid: string, cambios: Partial<DatosPerfil
     return await db.runTransaction(async (t) => {
       const perfil = await t.get(usuarioRef);
       if (!perfil.exists || perfil.get("eliminando")) throw new Error("PERFIL_NO_EXISTE");
+      if (correo && (await auth.getUser(uid)).email !== correo) throw new Error("PERFIL_MODIFICADO");
       const anterior = (perfil.get("username") as string).toLowerCase();
-      const siguiente = cambios.username?.toLowerCase() ?? anterior;
+      const siguiente = username ?? anterior;
       if (siguiente !== anterior) {
         const anteriorRef = usernames.doc(anterior);
         const siguienteRef = usernames.doc(siguiente);
