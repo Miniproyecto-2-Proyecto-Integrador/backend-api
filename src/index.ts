@@ -5,6 +5,8 @@ import { swaggerSpec } from "./config/swagger";
 import firestoreRoutes from "./routes/firestore.routes";
 import usuariosRoutes from "./routes/usuarios.routes";
 
+import eliminarCuentaRoutes from "./routes/eliminarCuenta.routes";
+
 const app = express();
 
 const allowedOrigins = [
@@ -31,6 +33,7 @@ app.get("/", (_req, res) => {
 });
 
 // Rutas de Firestore
+app.use("/api", eliminarCuentaRoutes);
 app.use("/api", firestoreRoutes);
 
 app.use("/api", usuariosRoutes);
