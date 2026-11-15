@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { crearUsuario, obtenerMiPerfil } from "../controllers/usuarios.controller";
+import { crearUsuario, editarMiPerfil, obtenerMiPerfil } from "../controllers/usuarios.controller";
 import { verificarToken } from "../middlewares/verificarToken";
 
 const router = Router();
@@ -111,5 +111,36 @@ router.post("/usuarios", verificarToken, crearUsuario);
  *         description: Error del servidor
  */
 router.get("/usuarios/yo", verificarToken, obtenerMiPerfil);
+
+/**
+ * @swagger
+ * /api/usuarios/yo:
+ *   patch:
+ *     summary: Editar los campos enviados del perfil propio
+ *     tags: [Usuarios]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             minProperties: 1
+ *             properties:
+ *               nombres: { type: string, maxLength: 50 }
+ *               apellidos: { type: string, maxLength: 50 }
+ *               username: { type: string, minLength: 3, maxLength: 20 }
+ *               avatar: { type: string, maxLength: 300 }
+ *               correo: { type: string, format: email }
+ *     responses:
+ *       200: { description: Perfil actualizado }
+ *       400: { description: Datos inválidos }
+ *       401: { description: Sesión inválida }
+ *       404: { description: Perfil inexistente }
+ *       409: { description: Correo o nombre de usuario ocupado }
+ *       500: { description: Error del servidor }
+ */
+router.patch("/usuarios/yo", verificarToken, editarMiPerfil);
 
 export default router;
