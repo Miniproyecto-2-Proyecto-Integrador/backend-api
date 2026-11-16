@@ -28,10 +28,9 @@ const swaggerOptions: swaggerJsdoc.Options = {
       },
     },
   },
-  apis:
-    process.env.NODE_ENV === "production"
-      ? ["./dist/routes/*.js"]
-      : ["./src/routes/*.ts"],
+  // The production image contains compiled JavaScript, so it must retain the
+  // @swagger comments from TypeScript for swagger-jsdoc to read them.
+  apis: ["./dist/routes/*.js"],
 };
 
 export const swaggerSpec = swaggerJsdoc(swaggerOptions);
