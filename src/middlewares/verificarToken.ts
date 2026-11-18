@@ -9,6 +9,14 @@ export async function verificarToken(
   const encabezado = req.headers.authorization;
 
   if (!encabezado || !encabezado.startsWith("Bearer ")) {
+    // Temporary diagnostic for requests that reach Render without a Bearer token.
+    console.error(
+      "401 sin Bearer. Ruta:",
+      req.method,
+      req.originalUrl,
+      "Encabezado presente:",
+      Boolean(encabezado)
+    );
     res.status(401).json({
       success: false,
       message: "No autorizado: debes iniciar sesión",
@@ -31,7 +39,15 @@ export async function verificarToken(
     res.locals.uid = datos.uid;
     res.locals.correo = datos.email;
     next();
-  } catch {
+  } catch (error) {
+    // Temporary diagnostic for Firebase token verification failures.
+    const fallo = error as { code?: string; message?: string };
+    console.error(
+      "401 verifyIdToken falló. code:",
+      fallo.code,
+      "| mensaje:",
+      fallo.message
+    );
     res.status(401).json({
       success: false,
       message: "No autorizado: la sesión no es válida o expiró",
