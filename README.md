@@ -213,7 +213,7 @@ GET /api/usuarios/yo
 
 Devuelve el perfil del usuario con sesión (nombres, apellidos, username, avatar, correo y creadoEn).
 
-Si el usuario inició sesión pero aún no tiene perfil (por ejemplo, entró con Google y no ha elegido su nombre de usuario), responde 404; el frontend usa esa respuesta para llevarlo a elegir su nombre de usuario.
+Si el usuario inició sesión pero aún no tiene perfil (por ejemplo, entró con Google y no ha elegido su nombre de usuario), responde 200 con `{ success: true, data: null }`; el frontend usa esa respuesta para llevarlo a elegir su nombre de usuario.
 
 Construcción y ejecución con Docker
 
@@ -290,3 +290,6 @@ Sprint 0: base técnica (conexión con Firestore, endpoint de consulta, Swagger 
 Sprint 1: autenticación y usuarios (verificación de sesión, creación y consulta de perfil, nombre de usuario único).
 
 Los nuevos endpoints se agregarán en los siguientes sprints.
+Compatibilidad TS-01: desplegar primero el frontend US-02 que acepta data null; luego este backend. PATCH de perfil inexistente conserva 404.
+
+Prueba del contrato de perfil: ejecutar `npm run build` y luego `node --test tests/perfil.test.cjs` (sin credenciales ni acceso a Firebase).

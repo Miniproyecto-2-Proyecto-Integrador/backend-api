@@ -85,10 +85,7 @@ export async function obtenerMiPerfil(_req: Request, res: Response) {
     const perfil = await obtenerPerfil(res.locals.uid);
 
     if (!perfil) {
-      res.status(404).json({
-        success: false,
-        message: "Este usuario aún no tiene perfil.",
-      });
+      res.status(200).json({ success: true, data: null });
       return;
     }
 

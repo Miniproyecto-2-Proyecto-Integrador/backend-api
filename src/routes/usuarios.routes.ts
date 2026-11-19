@@ -81,7 +81,7 @@ router.post("/usuarios", verificarToken, crearUsuario);
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Perfil del usuario
+ *         description: Perfil del usuario; data es null si aún no ha completado el registro
  *         content:
  *           application/json:
  *             example:
@@ -100,13 +100,6 @@ router.post("/usuarios", verificarToken, crearUsuario);
  *             example:
  *               success: false
  *               message: "No autorizado: debes iniciar sesión"
- *       404:
- *         description: El usuario aún no tiene perfil
- *         content:
- *           application/json:
- *             example:
- *               success: false
- *               message: Este usuario aún no tiene perfil.
  *       500:
  *         description: Error del servidor
  */
