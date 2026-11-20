@@ -9,7 +9,7 @@ const MAX_NOMBRE_SALA = 80;
  * @swagger
  * /api/salas:
  *   post:
- *     summary: Crear una sala como administrador
+ *     summary: Crear una sala como administrador con ID aleatorio de 8 caracteres
  *     tags: [Salas]
  *     security:
  *       - bearerAuth: []
@@ -27,7 +27,7 @@ const MAX_NOMBRE_SALA = 80;
  *         description: Sala creada
  *         content:
  *           application/json:
- *             example: { success: true, data: { id: "ABC123", nombre: Estudio, rol: administrador } }
+ *             example: { success: true, data: { id: "Ab3_xY-9", nombre: Estudio, rol: administrador } }
  *       400: { description: Nombre inválido }
  *       401: { description: Sesión inválida }
  *       404: { description: El usuario aún no tiene perfil }
