@@ -293,3 +293,6 @@ Los nuevos endpoints se agregarán en los siguientes sprints.
 Compatibilidad TS-01: desplegar primero el frontend US-02 que acepta data null; luego este backend. PATCH de perfil inexistente conserva 404.
 
 Prueba del contrato de perfil: ejecutar `npm run build` y luego `node --test tests/perfil.test.cjs` (sin credenciales ni acceso a Firebase).
+
+US-06: las salas nuevas tienen IDs aleatorios de 8 caracteres (A-Z, a-z, 0-9, guion y guion bajo). Se comprueba su disponibilidad en una transacción; hasta cinco candidatos en caso de colisión, sin sobrescribir salas. Las salas existentes conservan sus IDs. Desplegar primero los consumidores compatibles (frontend y realtime), después esta API.
+Pruebas de salas: `npm run build` y `node --test tests/salas.test.cjs`.
