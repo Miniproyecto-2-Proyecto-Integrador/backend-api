@@ -1,5 +1,6 @@
 import { Response, Router } from "express";
 import { verificarToken } from "../middlewares/verificarToken";
+import { LIMITE_MENSAJES, leerCursor, listarMensajes } from "../services/mensajes.service";
 import { actualizarSala, crearSala, eliminarSala, esIdSalaValido, listarSalasPropias, obtenerSala } from "../services/salas.service";
 
 const router = Router();
@@ -226,6 +227,82 @@ router.delete("/salas/:id", verificarToken, async (req, res) => {
     res.json({ success: true, message: "Sala eliminada." });
   } catch (error) {
     responderErrorSala(res, error, "eliminar");
+  }
+});
+
+/**
+ * @swagger
+ * /api/salas/{id}/mensajes:
+ *   get:
+ *     summary: Historial de chat de una sala, por partes (US-11)
+ *     description: Devuelve los mensajes en orden cronológico. Sin «antes» entrega los más recientes; con «antes» entrega los anteriores a ese cursor.
+ *     tags: [Salas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *       - in: query
+ *         name: limite
+ *         schema: { type: integer, minimum: 1, maximum: 50, default: 50 }
+ *         description: Cantidad de mensajes por parte
+ *       - in: query
+ *         name: antes
+ *         schema: { type: string }
+ *         description: Cursor «siguienteCursor» de la respuesta anterior
+ *     responses:
+ *       200:
+ *         description: Parte del historial (lista vacía si no hay mensajes)
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *               data:
+ *                 mensajes: [{ id: "Xq8d2LmN0pRs4TuVwYz1", salaId: "Ab3_xY-9", autor: ana, texto: Hola, creadoEn: "2026-11-24T15:00:00.000Z", esPropio: false }]
+ *                 hayMas: true
+ *                 siguienteCursor: "1795532400_0_Xq8d2LmN0pRs4TuVwYz1"
+ *       400: { description: ID, límite o cursor inválido }
+ *       401: { description: Sesión inválida }
+ *       404: { description: Sala no encontrada o el usuario aún no tiene perfil }
+ *       500: { description: Error del servidor }
+ */
+router.get("/salas/:id/mensajes", verificarToken, async (req, res) => {
+  const id = String(req.params.id ?? "").trim();
+  if (!esIdSalaValido(id)) {
+    res.status(400).json({ success: false, message: "El ID de la sala no es válido." });
+    return;
+  }
+  let limite = LIMITE_MENSAJES;
+  if (req.query.limite !== undefined) {
+    const valor = typeof req.query.limite === "string" && /^\d+$/.test(req.query.limite) ? Number(req.query.limite) : 0;
+    if (valor < 1 || valor > LIMITE_MENSAJES) {
+      res.status(400).json({ success: false, message: `El límite debe ser un número de 1 a ${LIMITE_MENSAJES}.` });
+      return;
+    }
+    limite = valor;
+  }
+  const antes = req.query.antes === undefined ? undefined : leerCursor(req.query.antes);
+  if (antes === null) {
+    res.status(400).json({ success: false, message: "El cursor de mensajes no es válido." });
+    return;
+  }
+  try {
+    const data = await listarMensajes(res.locals.uid, id, limite, antes);
+    res.json({ success: true, data });
+  } catch (error) {
+    const mensaje = error instanceof Error ? error.message : "";
+    if (mensaje === "SALA_NO_EXISTE") {
+      res.status(404).json({ success: false, message: "No encontramos una sala con ese ID." });
+      return;
+    }
+    if (mensaje === "PERFIL_NO_EXISTE") {
+      res.status(404).json({ success: false, message: "Completa tu perfil antes de ver el chat." });
+      return;
+    }
+    console.error("No se pudo cargar el historial", (error as { code?: string }).code);
+    res.status(500).json({ success: false, message: "No pudimos cargar los mensajes. Intenta de nuevo." });
   }
 });
 
