@@ -43,3 +43,39 @@ export async function obtenerSala(uid: string, id: string) {
     rol: sala.get("propietarioUid") === uid ? "administrador" : "participante",
   };
 }
+
+// Comprueba en una transacción que la sala existe y que quien consulta es el
+// anfitrión. Los errores se traducen a 404 y 403 en la ruta.
+async function validarAnfitrion(
+  t: FirebaseFirestore.Transaction,
+  uid: string,
+  id: string,
+  permitirEnEliminacion: boolean,
+) {
+  const salaRef = db.collection("rooms").doc(id);
+  const [sala, perfil] = await t.getAll(salaRef, db.collection("users").doc(uid));
+  if (!perfil.exists || perfil.get("eliminando")) throw new Error("PERFIL_NO_EXISTE");
+  if (!sala.exists || (sala.get("eliminando") && !permitirEnEliminacion)) throw new Error("SALA_NO_EXISTE");
+  if (sala.get("propietarioUid") !== uid) throw new Error("SIN_PERMISO");
+  return salaRef;
+}
+
+export async function actualizarSala(uid: string, id: string, nombre: string) {
+  await db.runTransaction(async (t) => {
+    const salaRef = await validarAnfitrion(t, uid, id, false);
+    t.update(salaRef, { nombre });
+  });
+  return { id, nombre, rol: "administrador" };
+}
+
+export async function eliminarSala(uid: string, id: string) {
+  // Marca la sala como «eliminando» para que nadie más entre mientras se borra.
+  // Si un intento anterior se interrumpió, el anfitrión puede repetirlo.
+  const salaRef = await db.runTransaction(async (t) => {
+    const ref = await validarAnfitrion(t, uid, id, true);
+    t.update(ref, { eliminando: true });
+    return ref;
+  });
+  await db.recursiveDelete(salaRef.collection("messages"));
+  await salaRef.delete();
+}
