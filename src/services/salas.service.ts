@@ -2,6 +2,12 @@ import { randomBytes } from "node:crypto";
 import { FieldValue } from "firebase-admin/firestore";
 import { db } from "../config/firebase";
 
+// Mismo formato que valida el servidor de tiempo real: IDs nuevos de 8
+// caracteres URL-safe e IDs existentes alfanuméricos de 20 caracteres.
+export function esIdSalaValido(id: unknown): id is string {
+  return typeof id === "string" && /^(?:[A-Za-z0-9_-]{8}|[A-Za-z0-9]{20})$/.test(id);
+}
+
 export async function crearSala(uid: string, nombre: string) {
   // La transacción comprueba y reserva cada candidato de forma atómica.
   for (let intento = 0; intento < 5; intento += 1) {
@@ -25,4 +31,15 @@ export async function listarSalasPropias(uid: string) {
     nombre: sala.get("nombre") as string,
     rol: "administrador",
   }));
+}
+
+export async function obtenerSala(uid: string, id: string) {
+  const [sala, perfil] = await db.getAll(db.collection("rooms").doc(id), db.collection("users").doc(uid));
+  if (!perfil.exists || perfil.get("eliminando")) throw new Error("PERFIL_NO_EXISTE");
+  if (!sala.exists || sala.get("eliminando")) return null;
+  return {
+    id: sala.id,
+    nombre: sala.get("nombre") as string,
+    rol: sala.get("propietarioUid") === uid ? "administrador" : "participante",
+  };
 }
